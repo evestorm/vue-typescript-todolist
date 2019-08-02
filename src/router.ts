@@ -7,7 +7,7 @@ function loadView(view: string) {
   return () => import(`./views/${view}`)
 }
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
@@ -17,37 +17,30 @@ export default new Router({
       component: loadView('Welcome'),
     },
     {
-      path: '/main',
+      path: '/main/:status',
+      name: 'main',
       component: loadView('Main'),
-      children: [
-        {
-          path: 'todo',
-          name: 'todo',
-          component: loadView('Todo'),
-        },
-        {
-          path: 'done',
-          name: 'done',
-          component: loadView('Done'),
-        },
-        {
-          path: 'all',
-          name: 'all',
-          component: loadView('All'),
-        },
-      ],
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue'),
-    },
-    {
-      path: '/',
-      redirect: '/main',
+      path: '*',
+      redirect: '/main/todo',
     },
   ],
 });
+
+router.beforeEach((to, from, next) => {
+  if (to.name === 'welcome') {
+    next()
+  } else {
+    // 第一次访问页面转到欢迎页
+    const versionNo = '1.0.0'
+    if (!window.localStorage.getItem('update-version') || window.localStorage.getItem('update-version') !== versionNo) {
+      window.localStorage.setItem('update-version', versionNo)
+      next({name: 'welcome'})
+    } else {
+      next()
+    }
+  }
+})
+
+export default router

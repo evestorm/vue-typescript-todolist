@@ -1,8 +1,6 @@
-# 编写步骤
+# 项目重点
 
-## 准备工作
-
-### 创建项目
+## 项目初始化
 
 ```shell
 vue create vue-typescript-todolist
@@ -28,7 +26,7 @@ cd vue-typescript-todolist
 npm run serve
 ```
 
-### 重置样式
+## 样式重置
 
 样式重置采用 [reset.css](https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.css) ，放在了 `public/css/` 目录下，文件最后追加了一些自定义样式。最后在 `public/index.html` 文件中引入：
 
@@ -36,11 +34,17 @@ npm run serve
 <link rel="stylesheet" type="text/css" href="./css/reset.css">
 ```
 
-### 素材准备
+顺便更改下 `viewport` ：
+
+```html
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+```
+
+## 素材准备
 
 图片素材例如logo放在了 `src/assets/` 目录下。
 
-### 安装 Vant 组件库
+## 安装 Vant 组件库
 
 ```shell
 npm i vant
@@ -50,120 +54,202 @@ npm i babel-plugin-import -D # 按需引入需要用到的插件
 在 `main.ts` 下引用本项目所需所有组件：
 
 ```js
-import { Button, Tabbar, TabbarItem, NavBar, Icon } from 'vant';
+import { Button, Tabbar, TabbarItem, NavBar, Icon, Popup, Field, Cell, CellGroup } from 'vant';
 
 Vue.use(Button).use(Tabbar).use(TabbarItem)
-.use(Icon).use(NavBar);
+.use(Icon).use(NavBar).use(Popup)
+.use(Field).use(Cell).use(CellGroup);
 ```
 
-## 底部标签栏搭建
-
-来到 `src/router.ts` 先配置一波路由：
+## 第一次访问跳转欢迎页
 
 ```js
-import Vue from 'vue';
-import Router from 'vue-router';
+...
+router.beforeEach((to, from, next) => {
+  if (to.name === 'welcome') {
+    next()
+  } else {
+    // 第一次访问页面转到欢迎页
+    const versionNo = '1.0.0'
+    if (!window.localStorage.getItem('update-version') || window.localStorage.getItem('update-version') !== versionNo) {
+      window.localStorage.setItem('update-version', versionNo)
+      next({name: 'welcome'})
+    } else {
+      next()
+    }
+  }
+})
 
-Vue.use(Router);
-
-function loadView(view: string) {
-  return () => import(`./views/${view}`)
-}
-
-export default new Router({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes: [
-    {
-      path: '/welcome',
-      name: 'welcome',
-      component: loadView('Welcome'),
-    },
-    {
-      path: '/main',
-      component: loadView('Main'),
-      children: [
-        {
-          path: 'todo',
-          name: 'todo',
-          component: loadView('Todo'),
-        },
-        {
-          path: 'done',
-          name: 'done',
-          component: loadView('Done'),
-        },
-        {
-          path: 'all',
-          name: 'all',
-          component: loadView('All'),
-        },
-      ],
-    },
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue'),
-    },
-    {
-      path: '/',
-      redirect: '/main',
-    },
-  ],
-});
+export default router
 ```
 
-根据上面的路由结构我们创建相应文件：
+## TS 在 Vue 中的写法
 
-- `src/views/`
-  - `Main.vue` 此文件由 `Index.vue` 改名而来，用来充当底部标签对应页面的父容器
-  - `Todo.vue` 待办列表页
-  - `Done.vue` 完成列表页
-  - `All.vue` 所有列表页
-
-这些文件除了 `Main.vue` ，创建出来后添加类似下方模板代码方便等会查看基本效果：
+### 组件
 
 ```html
-<template>
-  <div class="todo">
-    <p>我是列表</p>
-  </div>
-</template>
-
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Watch, Vue } from 'vue-property-decorator';
+
+@Component({
+  // 原组件名
+  name: 'Home',
+  // 原引入的子组件
+  components: { Item },
+  // 原 computed
+  computed: {
+    active() {
+
+    }
+  }
+})
+export default class XXX extends Vue {
+  // 原 data 中组件内部属性
+  private title: string = ''
+  public count: number = 0
+  public active?: boolean = false
+
+  // 原 props 中组件需要的属性
+  @Prop() private msg!: string
+
+  // 原 watch 中组件需要监控的属性
+  @Watch('$route')
+  private onRouteChange(route: Route) {
+
+  }
+  @Watch('obj', { immediate: true, deep: true })
+  private onShowChange(val: boolean, oldVal: boolean) {
+
+  }
+
+  // 生命周期函数
+  private created(): void {
+
+  }
+  private mounted(): void {
+
+  }
+
+  // 自定义方法，不用写在methods里面了
+  private gotoHome(e: any): void {
+    this.$router.push({path: '/main/todo'});
+  }
+}
+</script>
+```
+
+### $emit用法
+
+```js
+import { Vue, Component, Emit } from 'vue-property-decorator'
 
 @Component
-export default class Todo extends Vue {}
-</script>
+export default class YourComponent extends Vue {
+  count = 0
 
-<style scoped lang="scss">
-.todo {
-  height: 100%;
-  overflow-y: hidden;
+  @Emit()
+  addToCount(n: number) {
+    this.count += n
+  }
+
+  @Emit('reset')
+  resetCount() {
+    this.count = 0
+  }
+
+  @Emit()
+  returnValue() {
+    return 10
+  }
+
+  @Emit()
+  onInputChange(e) {
+    return e.target.value
+  }
+
+  @Emit()
+  promise() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(20)
+      }, 0)
+    })
+  }
 }
-</style>
 ```
 
-然后回到 `src/views/Main.vue` 中编写页面结构：
+等于
 
-```html
-<template>
-  <div class="main">
-    <van-nav-bar :title="nowTitle" class="navbar"/>
-    <router-view/>
-    <van-tabbar active-color="238bd4" v-model="active" @change="changeTabbar(active)">
-      <van-tabbar-item icon="todo-list-o" info="5">待办</van-tabbar-item>
-      <van-tabbar-item icon="passed" info="10" class="done">完成</van-tabbar-item>
-      <van-tabbar-item icon="orders-o">全部</van-tabbar-item>
-    </van-tabbar>
-  </div>
-</template>
+```js
+export default {
+  data() {
+    return {
+      count: 0
+    }
+  },
+  methods: {
+    addToCount(n) {
+      this.count += n
+      this.$emit('add-to-count', n)
+    },
+    resetCount() {
+      this.count = 0
+      this.$emit('reset')
+    },
+    returnValue() {
+      this.$emit('return-value', 10)
+    },
+    onInputChange(e) {
+      this.$emit('on-input-change', e.target.value, e)
+    },
+    promise() {
+      const promise = new Promise(resolve => {
+        setTimeout(() => {
+          resolve(20)
+        }, 0)
+      })
+
+      promise.then(value => {
+        this.$emit('promise', value)
+      })
+    }
+  }
+}
 ```
 
-具体业务代码在该文件中查看。
+### Vuex 的改变
 
-让我们回到浏览器，现在底部就会出现标签栏，点击后能够跳转到对应页面。
+原 `store.js` 写法参考 `src/store.ts`。
+
+#### 在组件中使用 vuex
+
+安装 `vuex-class` ：`npm i vuex-class`。
+
+```js
+import Vue from 'vue'
+import Component from 'vue-class-component'
+import { State, Getter, Action, Mutation } from 'vuex-class'
+
+@Component
+export class MyComp extends Vue {
+  @State('foo') stateFoo
+  @Getter('foo') getterFoo
+  @Getter('foo2') getterFoo
+  @Action('foo') actionFoo
+  @Mutation('foo') mutationFoo
+
+  created () {
+    this.stateFoo // -> store.state.foo
+    this.getterFoo // -> store.getters.foo
+    this.getterFoo2() // -> store.getters.foo2(2)
+    this.actionFoo({ value: true }) // -> store.dispatch('foo', { value: true })
+    this.mutationFoo({ value: true }) // -> store.commit('foo', { value: true })
+  }
+}
+```
+
+### 详细文档 + 资源
+
+- [vue-property-decorator](https://www.npmjs.com/package/vue-property-decorator) 在 vue-class-component 上增强更多的结合 Vue 特性的装饰器（e.g. @Prop @Emit @Inject）
+- [vuex-class](https://www.npmjs.com/package/vuex-class)
+- [TS -- vue和以前代码对比](https://www.kancloud.cn/cyyspring/vuejs/1058522)

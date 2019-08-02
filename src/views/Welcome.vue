@@ -20,12 +20,11 @@ export default class Welcome extends Vue {
   @Prop() private msg!: string;
 
   private gotoHome(e: any): void {
-    this.$router.push({name: 'main'});
+    this.$router.push({path: '/main/todo'});
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .welcome {
   height: 100vh;
@@ -66,9 +65,9 @@ export default class Welcome extends Vue {
       width: 100px;
       height: 46px;
       -webkit-appearance: none;
-      border: 2px solid #238bd4;
+      border: 2px solid #02b3e4;
       border-radius: 20px;
-      color: #238bd4;
+      color: #02b3e4;
       font-size: 20px;
       background-color: transparent;
     }

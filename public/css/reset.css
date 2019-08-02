@@ -72,6 +72,6 @@ input {
 }
 
 /* vant底部标签栏徽标颜色 */
-.van-tabbar-item.done .van-info {
-  background-color: #07c160 !important;
+.done.van-tabbar-item  .van-info {
+	background-color: #02ccba !important;
 }
