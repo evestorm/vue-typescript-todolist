@@ -27,4 +27,4 @@ npm run serve
 
 ## TS 在 Vue 中的写法
 
-点击 `note.md` 文件查看详情。
+点击 [note.md](note.md) 查看详情。
