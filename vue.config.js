@@ -1,5 +1,5 @@
 module.exports = {
-  publicPath: '/',
+  publicPath: '/vue-typescript-todolist/',
   outputDir: 'dist',
   devServer: {
     port: 8081
