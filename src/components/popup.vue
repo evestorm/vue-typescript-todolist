@@ -50,7 +50,7 @@ export default class Popup extends Vue {
     this.selfShow = val
   }
 
-  @Action('addItem') public actionAddItem (data: TodoItem): void {}
+  @Action('addItem') private actionAddItem(data: TodoItem): void {/**/}
 
   private addTodo() {
     this.item.id = getRandomStr(10)

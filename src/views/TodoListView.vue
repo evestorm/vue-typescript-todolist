@@ -13,18 +13,17 @@ import { Getter, Action } from 'vuex-class';
 
 @Component({
   components: { Item },
-  computed: {
-    todoList() {
-      return this.getterList(this.status)
-    }
-  }
 })
 export default class TodoListView extends Vue {
-  @Prop(Boolean) private status?: boolean
+  @Prop(Boolean) private status: boolean | undefined
 
-  @Getter('getList') getterList?: TodoItem[]
-  @Action('updateItem') private actionUpdateItem(id: string): void {}
-  @Action('deleteItem') private actionDeleteItem(id: string): void {}
+  @Getter('getList') private getterList!: (status?: boolean) => TodoItem[]
+  @Action('updateItem') private actionUpdateItem(id: string): void {/**/}
+  @Action('deleteItem') private actionDeleteItem(id: string): void {/**/}
+
+  get todoList(): TodoItem[] | [] {
+    return this.getterList(this.status)
+  }
 
   // 自定义方法
   private changeStatus(status: boolean, id: string) {

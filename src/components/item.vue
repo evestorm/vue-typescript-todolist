@@ -27,7 +27,7 @@ export default class Item extends Vue {
     return this.item ? !this.item.status : false
   }
   @Emit()
-  private triggerDelete(id: string) {}
+  private triggerDelete(id: string) {/**/}
 }
 </script>
 

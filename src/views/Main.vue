@@ -30,14 +30,6 @@ import { TodoItem, TODO_LIST } from '../store';
 
 @Component({
   components: { Popup, TodoListView },
-  computed: {
-    todoCount() {
-      return this.getterList(false).length
-    },
-    doneCount() {
-      return this.getterList(true).length
-    }
-  }
 })
 export default class Main extends Vue {
   private active: number = 0
@@ -46,7 +38,19 @@ export default class Main extends Vue {
 
   private show: boolean = false
 
-  @Watch('$route')
+  // @Getter('getList') getterList?: TodoItem[]
+  @Getter('getList') private getterList!: (status?: boolean) => TodoItem[]
+  @Action('loadList') private actionLoadList(data: TodoItem[]): void {/**/}
+  @Action('clearCompleted') private actionClearCompleted(): void {/**/}
+
+  get todoCount(): number {
+    return this.getterList(false).length
+  }
+  get doneCount(): number {
+    return this.getterList(true).length
+  }
+
+  @Watch('$route', { immediate: true, deep: true })
   private onRouteChange(route: Route) {
     switch (route.params.status) {
       case 'todo':
@@ -63,13 +67,10 @@ export default class Main extends Vue {
     }
   }
 
-  @Getter('getList') getterList?: TodoItem[]
-  @Action('loadList') private actionLoadList(data: TodoItem[]): void {}
-  @Action('clearCompleted') private actionClearCompleted(): void {}
 
   // 生命周期
   private created(): void {
-    let list = Storage.get<TodoItem>(TODO_LIST)
+    const list = Storage.get<TodoItem>(TODO_LIST)
     if (list) {
       this.actionLoadList(list)
     }
@@ -96,19 +97,13 @@ export default class Main extends Vue {
   private changeTabbar(active: number): void {
     switch (active) {
       case 0:
-        this.$router.push({
-          path: '/main/todo'
-        })
+        this.$router.push({ path: '/main/todo' })
         break
       case 1:
-        this.$router.push({
-          path: '/main/done'
-        })
+        this.$router.push({ path: '/main/done' })
         break
       case 2:
-        this.$router.push({
-          path: '/main/all'
-        })
+        this.$router.push({ path: '/main/all' })
         break
       default:
         break

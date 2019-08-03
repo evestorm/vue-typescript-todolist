@@ -96,12 +96,6 @@ import { Component, Prop, Watch, Vue } from 'vue-property-decorator';
   name: 'Home',
   // 原引入的子组件
   components: { Item },
-  // 原 computed
-  computed: {
-    active() {
-
-    }
-  }
 })
 export default class XXX extends Vue {
   // 原 data 中组件内部属性
@@ -110,7 +104,13 @@ export default class XXX extends Vue {
   public active?: boolean = false
 
   // 原 props 中组件需要的属性
-  @Prop() private msg!: string
+  @Prop({
+    type: Boolean, // 父组件传递给子组件的数据类型
+    required: false, // 是否必填
+    default: false // 默认值， 如果传入的是 Object，则要 default: ()=>({}) 参数为函数
+  }) private msg!: string
+  @Prop()private data!: any
+  // 感叹号是非null和非undefined的类型断言，所以上面的写法就是对data这个属性进行非空断言
 
   // 原 watch 中组件需要监控的属性
   @Watch('$route')
@@ -133,6 +133,11 @@ export default class XXX extends Vue {
   // 自定义方法，不用写在methods里面了
   private gotoHome(e: any): void {
     this.$router.push({path: '/main/todo'});
+  }
+
+  // 原 computed ，当方法写，加一个关键字get
+  get MyTitle():string {
+    return `My title is ${this.title}`
   }
 }
 </script>
@@ -178,7 +183,7 @@ export default class YourComponent extends Vue {
 }
 ```
 
-等于
+相当于
 
 ```js
 export default {
